@@ -66,7 +66,12 @@ app.layout = html.Div([
                     options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
                     multi=True
                 ),
-                html.P(id='x_out')
+                dcc.Dropdown(
+                    id='obj_bayes',
+                    multi=True
+                ),
+                dbc.Button("Confirm options",id='button'),
+                html.P(id='Results')
 
 
 
@@ -83,10 +88,22 @@ def plotOneVar(choose_x):
             fig.add_scatter(x=test_data[i], y=test_data['mix'])
     return fig
 
-@app.callback(Output('x_out','children'),
+@app.callback(Output('obj_bayes','options'),
               Input('x_bayes','value'))
-def tellMe(choose_x):
-    return choose_x
+def otherCols(x_bayes_items):
+    return [{'label': i, 'value': i} for i in test_data.columns if i not in x_bayes_items]
+
+@app.callback(Output('Results','children'),
+              Input('button','n_clicks'),
+              State('x_bayes','value'),
+              State('obj_bayes','value'))
+def doBayes(n_clicks,x,obj):
+    if not n_clicks:
+        from dash.exceptions import PreventUpdate
+        raise PreventUpdate
+    results = 'Cols for x: '+str(x)+' Cols for obj: '+str(obj)
+    return results
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
