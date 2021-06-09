@@ -105,6 +105,5 @@ def dobayes(n_clicks, x, obj):
 
     return results
 
-
 if __name__ == '__main__':
     app.run_server(debug=True)
