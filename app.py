@@ -123,16 +123,52 @@ def dobayes(n_clicks, x, obj):
         train_x = torch.tensor(test_data[x])
         print(train_x)
     if type(x) == list:
-        train_x = torch.tensor(test_data[x[0]])
-        for i in range(1, len(x)):
-            train_x = torch.cat((train_x, torch.tensor(test_data[x[i]])), 0)
-        print(train_x)
+        tensSeq = []
+        for i in range(0, len(x)):
+            tenstr = x[i]
+            print(torch.tensor(test_data[x[i]]))
+            locals()[tenstr] = torch.tensor(test_data[x[i]])
+            tensSeq.append(locals()[tenstr])
+        train_x = torch.dstack(tuple(tensSeq))[0]
 
     train_obj = torch.tensor(test_data[obj[0]])
     for i in range(1, len(obj)):
         train_obj = torch.cat((train_obj, torch.tensor(test_data[x[i]])), 0)
 
-    return train_obj
+    train_obj = train_obj.unsqueeze(-1)
+
+    #calculate bounds from x data limits
+    l = train_x.shape[1]
+    mins = [train_x[:,i].min() for i in range(l)]
+    maxs = [train_x[:,i].max() for i in range(l)]
+    bounds = torch.tensor([[mins],[maxs]])
+
+    #setup model
+    model = SingleTaskGP(train_x, train_obj)
+    #model.likelihood.noise_covar.register_constraint("raw_noise", GreaterThan(noise))
+    mll = ExactMarginalLogLikelihood(model.likelihood, model)
+
+    #fit model to x data
+    fit_gpytorch_model(mll)
+
+    #select acqstn function based on number of objectives
+    if train_obj.shape[1] == 1:
+        #use analytic expected improvement
+        EI = ExpectedImprovement(model=model, best_f=train_obj.max())
+
+        # optimize acquisition function
+        params, _ = optimize_acqf(
+            acq_function=EI,
+            bounds=bounds,
+            num_restarts=20,
+            raw_samples=100,
+            q=1,
+            options={},
+        )
+
+    print(params)
+
+    return params[0]
 
 
 if __name__ == '__main__':
