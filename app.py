@@ -8,6 +8,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash_table
 
+from botorch.models.gp_regression import SingleTaskGP
+from gpytorch.constraints import GreaterThan
+from botorch import fit_gpytorch_model
+from botorch.acquisition import ExpectedImprovement
+from botorch.optim import optimize_acqf
+from botorch.test_functions import Hartmann
+
+from gpytorch.mlls import ExactMarginalLogLikelihood
+
+from torch import device as dvc
+import torch
+
 fileLoc = 'data/logs1.csv'
 test_data = pd.read_csv(fileLoc)
 
@@ -103,7 +115,25 @@ def dobayes(n_clicks, x, obj):
         raise PreventUpdate
     results = 'Cols for x: ' + str(x) + ' Cols for obj: ' + str(obj)
 
-    return results
+    # set to run on the cpu
+    device = dvc("cpu")
+
+    # configure inputs x and objs from inputs
+    if type(x) == str:
+        train_x = torch.tensor(test_data[x])
+        print(train_x)
+    if type(x) == list:
+        train_x = torch.tensor(test_data[x[0]])
+        for i in range(1, len(x)):
+            train_x = torch.cat((train_x, torch.tensor(test_data[x[i]])), 0)
+        print(train_x)
+
+    train_obj = torch.tensor(test_data[obj[0]])
+    for i in range(1, len(obj)):
+        train_obj = torch.cat((train_obj, torch.tensor(test_data[x[i]])), 0)
+
+    return train_obj
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
