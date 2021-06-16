@@ -6,10 +6,23 @@ body {
 
 .header {
     background-color: #FFFFFF;
-    height: 256px;
+    height: 128px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.parcoordsgraph {
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.threegraphs {
+    background-color: #FFFFFF;
+
+
 }
 
 .header-emoji {

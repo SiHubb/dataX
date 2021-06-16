@@ -24,14 +24,14 @@ import torch
 
 fileLoc = 'data/logs1.csv'
 test_data = pd.read_csv(fileLoc)
-print(test_data.to_dict('records'))
-df = px.data.iris()
-fig = px.parallel_coordinates(test_data, color="mix",
+
+
+parfig = px.parallel_coordinates(test_data, color="mix",
                               dimensions=['p1', 'p2', 'p3', 'p4', 'mix'],
                               color_continuous_scale=px.colors.diverging.Earth,
                               color_continuous_midpoint=0.15)
 
-external_stylesheets = [dbc.themes.BOOTSTRAP]
+external_stylesheets = [dbc.themes.LUMEN]
 # external_stylesheets = [
 #     {
 #         "href": "https://fonts.googleapis.com/css2?"
@@ -39,41 +39,86 @@ external_stylesheets = [dbc.themes.BOOTSTRAP]
 #         "rel": "stylesheet",
 #     },
 # ]
+
+colors = {
+    "graphBackground": "#F5F5F5",
+    "background": "#ffffff",
+    "text": "#000000"
+}
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
     dbc.Row([
-        dbc.Col('upstream logo here', width=2),
-        dbc.Col('Broad and deep simulation and optimisation services', width=4),
-        dbc.Col('caeClouds logo here', width=2),
-        dbc.Col('The CAE podcast delving in to the breadth of toolsets', width=4),
-    ]),
+        dbc.Col(),
+        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')),style={'textAlign': 'center'}),
+        dbc.Col( ),
+            ],
+            className="header"),
+
     dbc.Row([
-        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')), width=4),
-        dbc.Col('Upload or create an original dataset, explore relationships and '
-                'get recommended next parameters to test', width=8),
-    ]),
+        dbc.Col(),
+        dbc.Col(dcc.Graph(figure=parfig)),
+        dbc.Col()
+    ], className="parcoordsgraph"),
+
     dbc.Row([
-        html.P('You are looking at the data in: ' + fileLoc)
-    ]),
-    dbc.Row([
-        dbc.Col(
-            dash_table.DataTable(
-                data=test_data.to_dict('records'),
-                columns=[{'name': i, 'id': i} for i in test_data.columns]
-            ), width=8
-        )
+        dbc.Col([
+            dbc.Row(
+                dbc.Col(
+                    dcc.Dropdown(
+                    id='hist_drop',
+                    value='p1',
+                    options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
+                    ),
+                    width=4
+
+                )
+            ),
+
+            dbc.Row(
+                dbc.Col(dcc.Graph(id='hist'))
+            )
+        ],width=4),
+
+        dbc.Col([
+            dbc.Row(
+
+            ),
+
+            dbc.Row(
+                dbc.Col(dcc.Graph(id='corr'))
+            )
+        ],width=4),
+
+        dbc.Col([
+            dbc.Row(
+                dbc.Col([
+                    dcc.Dropdown(
+                        id='scat_drop',
+                        value='p1',
+                        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
+                    ),
+                    dcc.Dropdown(
+                        id='scat_drop2',
+                        value='p2',
+                        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
+                    ),
+                ],width=4)
+            ),
+
+            dbc.Row(
+                dbc.Col(dcc.Graph(id='scat'))
+            )
+        ],width=4),
 
     ]),
-    dbc.Row([
-        dbc.Col(dcc.Graph(figure=fig), width=10)
-    ]),
+
     dcc.Dropdown(
         id='p_dropdown',
         value='p1',
         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
     ),
-    dcc.Graph(id='scatter_graph'),
+
     dcc.Dropdown(
         id='x_bayes',
         #value='p1',
@@ -94,16 +139,12 @@ app.layout = html.Div([
 ])
 
 
-@app.callback(Output('scatter_graph', 'figure'),
-              Input('x_bayes', 'value'))
-def plotonevar(choose_x):
-    localfig = go.Figure()
-    if type(choose_x) == str:
-        localfig.add_scatter(x=test_data[choose_x], y=test_data['mix'])
-    elif type(choose_x) == list:
-        for i in choose_x:
-            localfig.add_scatter(x=test_data[i], y=test_data['mix'])
-    return localfig
+@app.callback(Output('scat','figure'),
+              Input('scat_drop','value'),
+              Input('scat_drop2','value'))
+def makescat(a,b):
+    fig = px.scatter(test_data, x=a, y=b, color="mix", template="simple_white")
+    return fig;
 
 @app.callback(Output('datatable', 'columns'),
               Input('x_bayes', 'value'))
@@ -216,9 +257,7 @@ def dobayes(n_clicks, x, obj):
             sequential=True,
         )
 
-    print(params)
     temp = [{x[i]: float(params[0][i]) for i in range(len(x))}]
-    print(temp)
 
     return temp
 
