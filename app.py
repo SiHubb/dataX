@@ -13,7 +13,9 @@ from gpytorch.constraints import GreaterThan
 from botorch import fit_gpytorch_model
 from botorch.acquisition import ExpectedImprovement
 from botorch.optim import optimize_acqf
-from botorch.test_functions import Hartmann
+from botorch.utils.multi_objective.box_decompositions.non_dominated import NondominatedPartitioning
+from botorch.sampling.samplers import SobolQMCNormalSampler
+from botorch.acquisition.multi_objective.monte_carlo import qExpectedHypervolumeImprovement
 
 from gpytorch.mlls import ExactMarginalLogLikelihood
 
@@ -121,21 +123,27 @@ def dobayes(n_clicks, x, obj):
     # configure inputs x and objs from inputs
     if type(x) == str:
         train_x = torch.tensor(test_data[x])
-        print(train_x)
+
     if type(x) == list:
         tensSeq = []
         for i in range(0, len(x)):
             tenstr = x[i]
-            print(torch.tensor(test_data[x[i]]))
             locals()[tenstr] = torch.tensor(test_data[x[i]])
             tensSeq.append(locals()[tenstr])
         train_x = torch.dstack(tuple(tensSeq))[0]
 
-    train_obj = torch.tensor(test_data[obj[0]])
-    for i in range(1, len(obj)):
-        train_obj = torch.cat((train_obj, torch.tensor(test_data[x[i]])), 0)
+    tensSeq = []
+    for i in range(0, len(obj)):
+        tenstr = obj[i]
+        locals()[tenstr] = torch.tensor(test_data[obj[i]])
+        tensSeq.append(locals()[tenstr])
+    train_obj = torch.dstack(tuple(tensSeq))[0]
 
-    train_obj = train_obj.unsqueeze(-1)
+    #train_obj = train_obj.unsqueeze(-1)
+
+    # print(obj)
+    # print(train_x)
+    # print(train_obj)
 
     #calculate bounds from x data limits
     l = train_x.shape[1]
@@ -166,7 +174,32 @@ def dobayes(n_clicks, x, obj):
             options={},
         )
 
-    print(params)
+    elif train_obj.shape[1] > 1:
+        #use hypervolume improvement
+        #calculate ref point as minimum of all objectives
+        k = train_obj.shape[1]
+        ref_point=torch.tensor([train_obj[:,i].min() for i in range(k)])
+        print(ref_point)
+        partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_obj)
+
+        sampler = SobolQMCNormalSampler(num_samples=512)
+
+        acq_func = qExpectedHypervolumeImprovement(
+            model=model,
+            ref_point=ref_point.tolist(),  # use known reference point
+            partitioning=partitioning,
+            sampler=sampler,
+        )
+        # optimize
+        params, _ = optimize_acqf(
+            acq_function=acq_func,
+            bounds=bounds,
+            q=1,
+            num_restarts=20,
+            raw_samples=512,  # used for intialization heuristic
+            options={"batch_limit": 5, "maxiter": 200, "nonnegative": True},
+            sequential=True,
+        )
 
     return params[0]
 
