@@ -24,7 +24,7 @@ import torch
 
 fileLoc = 'data/logs1.csv'
 test_data = pd.read_csv(fileLoc)
-
+print(test_data.to_dict('records'))
 df = px.data.iris()
 fig = px.parallel_coordinates(test_data, color="mix",
                               dimensions=['p1', 'p2', 'p3', 'p4', 'mix'],
@@ -63,6 +63,7 @@ app.layout = html.Div([
                 columns=[{'name': i, 'id': i} for i in test_data.columns]
             ), width=8
         )
+
     ]),
     dbc.Row([
         dbc.Col(dcc.Graph(figure=fig), width=10)
@@ -75,7 +76,7 @@ app.layout = html.Div([
     dcc.Graph(id='scatter_graph'),
     dcc.Dropdown(
         id='x_bayes',
-        value='p1',
+        #value='p1',
         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
         multi=True
     ),
@@ -84,8 +85,12 @@ app.layout = html.Div([
         multi=True
     ),
     dbc.Button("Confirm options", id='button'),
-    html.P(id='Results')
+    html.P(id='Results'),
 
+    dash_table.DataTable(
+        id='datatable',
+
+    )
 ])
 
 
@@ -100,14 +105,24 @@ def plotonevar(choose_x):
             localfig.add_scatter(x=test_data[i], y=test_data['mix'])
     return localfig
 
+@app.callback(Output('datatable', 'columns'),
+              Input('x_bayes', 'value'))
+def passiton(x_bayes_items):
+    if type(x_bayes_items) == list:
+        return [{"name": i, "id": i} for i in x_bayes_items]
 
 @app.callback(Output('obj_bayes', 'options'),
               Input('x_bayes', 'value'))
 def othercols(x_bayes_items):
-    return [{'label': i, 'value': i} for i in test_data.columns if i not in x_bayes_items]
+    print(type(x_bayes_items))
+    if type(x_bayes_items) == list:
+        return [{'label': i, 'value': i} for i in test_data.columns if i not in x_bayes_items]
+    else:
+        return [{'label': i, 'value': i} for i in test_data.columns]
 
 
-@app.callback(Output('Results', 'children'),
+
+@app.callback(Output('datatable', 'data'),
               Input('button', 'n_clicks'),
               State('x_bayes', 'value'),
               State('obj_bayes', 'value'))
@@ -179,7 +194,7 @@ def dobayes(n_clicks, x, obj):
         #calculate ref point as minimum of all objectives
         k = train_obj.shape[1]
         ref_point=torch.tensor([train_obj[:,i].min() for i in range(k)])
-        print(ref_point)
+        #print(ref_point)
         partitioning = NondominatedPartitioning(ref_point=ref_point, Y=train_obj)
 
         sampler = SobolQMCNormalSampler(num_samples=512)
@@ -201,7 +216,11 @@ def dobayes(n_clicks, x, obj):
             sequential=True,
         )
 
-    return params[0]
+    print(params)
+    temp = [{x[i]: float(params[0][i]) for i in range(len(x))}]
+    print(temp)
+
+    return temp
 
 
 if __name__ == '__main__':
