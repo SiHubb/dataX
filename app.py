@@ -63,17 +63,29 @@ app.layout = html.Div([
 
     dbc.Row([
         dbc.Col([
-            dbc.Row(
-                dbc.Col(
+            dbc.Row([
+                dbc.Col([
+                    html.P('Variable'),
                     dcc.Dropdown(
-                    id='hist_drop',
-                    value='p1',
-                    options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
+                        id='hist_drop',
+                        value='p1',
+                        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
                     ),
-                    width=4
 
-                )
-            ),
+                ], width=4),
+
+                dbc.Col([
+                    html.P('# bins'),
+                    dcc.Slider(
+                        id='hist_slide',
+                        min=5,
+                        max=15,
+                        step=5,
+                        included=False
+                    ),
+
+                ], width=8),
+            ]),
 
             dbc.Row(
                 dbc.Col(dcc.Graph(id='hist'))
@@ -81,9 +93,10 @@ app.layout = html.Div([
         ],width=4),
 
         dbc.Col([
-            dbc.Row(
+            dbc.Row([
 
-            ),
+
+            ]),
 
             dbc.Row(
                 dbc.Col(dcc.Graph(id='corr'))
@@ -163,6 +176,14 @@ app.layout = html.Div([
               Input('scat_drop3','value'))
 def makescat(a,b,c):
     fig = px.scatter(test_data, x=a, y=b, color=c, template="simple_white")
+    return fig;
+
+@app.callback(Output('hist','figure'),
+              Input('hist_drop','value'),
+              Input('hist_slide','value'),
+             )
+def makehist(a,b):
+    fig = px.histogram(test_data, x=a, nbins=b)
     return fig;
 
 @app.callback(Output('datatable', 'columns'),
