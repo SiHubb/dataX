@@ -146,44 +146,55 @@ app.layout = html.Div([
     ],style={'background-color': '#FFFFFF'}),
 
     dbc.Row([
-        dbc.Col(),
+        dbc.Col(width=4),
 
         dbc.Col([
 
             dbc.Row([
                 dbc.Col([
                     dbc.Row(html.P('Select input parameters')),
-                    dbc.Row(html.P('Select objective parameters')),
-                ]),
+                    dcc.Dropdown(
+                        id='x_bayes',
+                        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
+                        multi=True,
+                    )
+                ],width=6),
 
                 dbc.Col([
                     dbc.Row(
-                        dcc.Dropdown(
-                                id='x_bayes',
-                                #value='p1',
-                                options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
-                                multi=True
+                        dbc.Col(
+                            dbc.Row(html.P('Select objective parameters'))
+
                         )
                     ),
                     dbc.Row(
-                        dcc.Dropdown(
-                            id='obj_bayes',
-                            multi=True
+                        dbc.Col(
+                            dcc.Dropdown(
+                                id='obj_bayes',
+                                multi=True
+
+                            )
+
+
                         )
                     )
-                ]),
+                ],width=6),
 
-                dbc.Col(dbc.Button("Go", id='button')),
+
             ]),
 
             dbc.Row(
+                dbc.Col(dbc.Button("Generate Recommendation", id='button'),width=12),className="button"
+            ),
+
+            dbc.Row(
                 dbc.Col(
-                    dash_table.DataTable(id='datatable')
+                    dash_table.DataTable(id='datatable',style_cell={'textAlign': 'center'},),width=4
                 )
             )
         ]),
 
-        dbc.Col()
+        dbc.Col(width=4)
 
     ],style={'background-color': '#FFFFFF'}),
 
@@ -191,7 +202,7 @@ app.layout = html.Div([
 
 
 
-],style={'background-color': '#FFFFFF'})
+],className="body")
 
 
 
@@ -236,7 +247,6 @@ def dobayes(n_clicks, x, obj):
     if not n_clicks:
         from dash.exceptions import PreventUpdate
         raise PreventUpdate
-    results = 'Cols for x: ' + str(x) + ' Cols for obj: ' + str(obj)
 
     # set to run on the cpu
     device = dvc("cpu")
