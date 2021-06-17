@@ -91,20 +91,38 @@ app.layout = html.Div([
         ],width=4),
 
         dbc.Col([
-            dbc.Row(
+            dbc.Row([
                 dbc.Col([
+                    html.P('x variable'),
                     dcc.Dropdown(
                         id='scat_drop',
                         value='p1',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-                    ),
+                        ),
+
+                ],width=4),
+                dbc.Col([
+                    html.P('y variable'),
                     dcc.Dropdown(
                         id='scat_drop2',
                         value='p2',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-                    ),
-                ],width=4)
-            ),
+                        ),
+
+                ],width=4),
+                dbc.Col([
+                    html.P('Colour variable'),
+                    dcc.Dropdown(
+                        id='scat_drop3',
+                        value='mix',
+                        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
+                        ),
+
+                ],width=4),
+
+
+
+            ]),
 
             dbc.Row(
                 dbc.Col(dcc.Graph(id='scat'))
@@ -141,9 +159,10 @@ app.layout = html.Div([
 
 @app.callback(Output('scat','figure'),
               Input('scat_drop','value'),
-              Input('scat_drop2','value'))
-def makescat(a,b):
-    fig = px.scatter(test_data, x=a, y=b, color="mix", template="simple_white")
+              Input('scat_drop2','value'),
+              Input('scat_drop3','value'))
+def makescat(a,b,c):
+    fig = px.scatter(test_data, x=a, y=b, color=c, template="simple_white")
     return fig;
 
 @app.callback(Output('datatable', 'columns'),
