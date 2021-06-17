@@ -94,12 +94,13 @@ app.layout = html.Div([
 
         dbc.Col([
             dbc.Row([
+                dbc.Col(html.P('Correlation Matrix'))
 
 
             ]),
 
             dbc.Row(
-                dbc.Col(dcc.Graph(id='corr'))
+                dbc.Col(dcc.Graph(figure=px.imshow(test_data.corr())))
             )
         ],width=4),
 
@@ -142,32 +143,57 @@ app.layout = html.Div([
             )
         ],width=4),
 
-    ]),
+    ],style={'background-color': '#FFFFFF'}),
 
-    dcc.Dropdown(
-        id='p_dropdown',
-        value='p1',
-        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-    ),
+    dbc.Row([
+        dbc.Col(),
 
-    dcc.Dropdown(
-        id='x_bayes',
-        #value='p1',
-        options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
-        multi=True
-    ),
-    dcc.Dropdown(
-        id='obj_bayes',
-        multi=True
-    ),
-    dbc.Button("Confirm options", id='button'),
-    html.P(id='Results'),
+        dbc.Col([
 
-    dash_table.DataTable(
-        id='datatable',
+            dbc.Row([
+                dbc.Col([
+                    dbc.Row(html.P('Select input parameters')),
+                    dbc.Row(html.P('Select objective parameters')),
+                ]),
 
-    )
-])
+                dbc.Col([
+                    dbc.Row(
+                        dcc.Dropdown(
+                                id='x_bayes',
+                                #value='p1',
+                                options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
+                                multi=True
+                        )
+                    ),
+                    dbc.Row(
+                        dcc.Dropdown(
+                            id='obj_bayes',
+                            multi=True
+                        )
+                    )
+                ]),
+
+                dbc.Col(dbc.Button("Go", id='button')),
+            ]),
+
+            dbc.Row(
+                dbc.Col(
+                    dash_table.DataTable(id='datatable')
+                )
+            )
+        ]),
+
+        dbc.Col()
+
+    ],style={'background-color': '#FFFFFF'}),
+
+
+
+
+
+],style={'background-color': '#FFFFFF'})
+
+
 
 
 @app.callback(Output('scat','figure'),
@@ -195,7 +221,6 @@ def passiton(x_bayes_items):
 @app.callback(Output('obj_bayes', 'options'),
               Input('x_bayes', 'value'))
 def othercols(x_bayes_items):
-    print(type(x_bayes_items))
     if type(x_bayes_items) == list:
         return [{'label': i, 'value': i} for i in test_data.columns if i not in x_bayes_items]
     else:
