@@ -152,7 +152,7 @@ app.layout = html.Div([
 
             dbc.Row([
                 dbc.Col([
-                    dbc.Row(html.P('Select input parameters')),
+                    html.P('Select inputs'),
                     dcc.Dropdown(
                         id='x_bayes',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
@@ -161,26 +161,12 @@ app.layout = html.Div([
                 ],width=6),
 
                 dbc.Col([
-                    dbc.Row(
-                        dbc.Col(
-                            dbc.Row(html.P('Select objective parameters'))
-
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            dcc.Dropdown(
-                                id='obj_bayes',
-                                multi=True
-
-                            )
-
-
-                        )
+                    html.P('Select objectives'),
+                    dcc.Dropdown(
+                        id='obj_bayes',
+                        multi=True
                     )
-                ],width=6),
-
-
+                ],width=6)
             ]),
 
             dbc.Row(
@@ -192,7 +178,7 @@ app.layout = html.Div([
                     dash_table.DataTable(id='datatable',style_cell={'textAlign': 'center'},),width=4
                 )
             )
-        ]),
+        ],width=4),
 
         dbc.Col(width=4)
 
