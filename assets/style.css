@@ -13,17 +13,43 @@ body {
     justify-content: center;
 }
 
+.textheaders {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    background-color: #ffffff;
+    bottom: 0;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.datax {
+    background-color: #FFFFFF;
+    height = 128px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
 .parcoordsgraph {
     background-color: #FFFFFF;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-bottom: 30px;
 }
 
 .threegraphs {
     background-color: #FFFFFF;
+}
 
+.left {
+margin-left: 30px;
+}
 
+.right {
+margin-right: 30px;
 }
 
 .header-emoji {

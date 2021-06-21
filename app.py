@@ -50,32 +50,47 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div([
     dbc.Row([
         dbc.Col(),
-        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')),style={'textAlign': 'center'}),
+        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')), style={'textAlign': 'center'}),
         dbc.Col( ),
-            ],
-            className="header"),
+            ], className="datax"),
+
+    dbc.Row([
+        dbc.Col(html.P('Parallel Co-ordinates'), className="textheaders"),
+    ]),
 
     dbc.Row([
         dbc.Col(),
-        dbc.Col(dcc.Graph(figure=parfig)),
+        dbc.Col(dcc.Graph(figure=parfig),className="parcoordsgraph",width=12),
         dbc.Col()
     ], className="parcoordsgraph"),
 
     dbc.Row([
+        dbc.Col(html.P('Histogram'),width=4, className="textheaders"),
+        dbc.Col(html.P('Correlation'),width=4, className="textheaders"),
+        dbc.Col(html.P('Scatter'),width=4, className="textheaders")
+    ]),
+
+    dbc.Row([
+            dbc.Col(dcc.Graph(id='hist'),width=4),
+            dbc.Col(dcc.Graph(figure=px.imshow(test_data.corr(),color_continuous_scale=px.colors.sequential.Viridis
+                                               , zmin=-1, zmax=1)),width=4),
+            dbc.Col(dcc.Graph(id='scat'),width=4)
+    ],style={'background-color': '#FFFFFF'}),
+
+dbc.Row([
+
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    html.P('Variable'),
+                    html.P('Variable', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='hist_drop',
                         value='p1',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
                     ),
-
-                ], width=4),
-
+                ], className="left",width=4),
                 dbc.Col([
-                    html.P('# bins'),
+                    html.P('# bins', style={'textAlign': 'center'}),
                     dcc.Slider(
                         id='hist_slide',
                         min=5,
@@ -84,69 +99,55 @@ app.layout = html.Div([
                         included=False
                     ),
 
-                ], width=8),
-            ]),
-
-            dbc.Row(
-                dbc.Col(dcc.Graph(id='hist'))
-            )
+                ], width=6),
+            ])
         ],width=4),
 
-        dbc.Col([
-            dbc.Row([
-                dbc.Col(html.P('Correlation Matrix'))
-
-
-            ]),
-
-            dbc.Row(
-                dbc.Col(dcc.Graph(figure=px.imshow(test_data.corr(),color_continuous_scale=px.colors.sequential.Viridis)))
-            )
-        ],width=4),
+        dbc.Col(),
 
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    html.P('x variable'),
+                    html.P('x variable:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop',
                         value='p1',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-                        ),
+                    ),
 
-                ],width=4),
+                ]),
                 dbc.Col([
-                    html.P('y variable'),
+                    html.P('y variable:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop2',
                         value='p2',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-                        ),
+                    ),
 
-                ],width=4),
+                ]),
                 dbc.Col([
-                    html.P('Colour variable'),
+                    html.P('Colour:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop3',
                         value='mix',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
-                        ),
+                    ),
 
-                ],width=4),
-
-
-
-            ]),
-
-            dbc.Row(
-                dbc.Col(dcc.Graph(id='scat'))
-            )
-        ],width=4),
-
-    ],style={'background-color': '#FFFFFF'}),
+                ], className="right"),
+            ])
+        ])
+    ]),
 
     dbc.Row([
-        dbc.Col(width=4),
+        dbc.Col(html.P('Bayesian Recommendation'), className="textheaders",style={'margin-top': '80px','margin-bottom': '30px'}),
+    ]),
+
+    dbc.Row([
+        dbc.Col(width=2),
+        dbc.Col(html.P('Select the input paramters you would like recommended values for, calculated using Bayesian'
+                       ' optimisation based on maximising the selected single objective, or maximising the hypervolume'
+                       ' of the pareto front when multiple objectves are selected.'),
+            width=4),
 
         dbc.Col([
 
@@ -180,11 +181,26 @@ app.layout = html.Div([
             )
         ],width=4),
 
-        dbc.Col(width=4)
+
 
     ],style={'background-color': '#FFFFFF'}),
 
+    dbc.Row([
+        dbc.Col(
+            html.Img(src=app.get_asset_url('UPSTREAM_logo.png'))
+        ),
+        dbc.Col(
+            html.P('Built by Upstream Applied Science Ltd.'),
 
+        ),
+        dbc.Col(
+            dbc.Button("Find out more", href='https://www.upstream-applied-science.com')
+        )
+
+
+
+
+    ],style={'margin-top': '80px','margin-bottom': '30px'})
 
 
 
