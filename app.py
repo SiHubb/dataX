@@ -22,13 +22,13 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from torch import device as dvc
 import torch
 
-fileLoc = 'data/logs1.csv'
+fileLoc = 'data/bioreactor.csv'
 test_data = pd.read_csv(fileLoc)
 
 
 parfig = px.parallel_coordinates(test_data, color="mix",
-                              dimensions=['p1', 'p2', 'p3', 'p4', 'mix'],
-                              color_continuous_scale=px.colors.diverging.Earth,
+                              dimensions=['p1', 'p2', 'rps', 'dam', 'mix'],
+                              color_continuous_scale=px.colors.sequential.Viridis,
                               color_continuous_midpoint=0.15)
 
 external_stylesheets = [dbc.themes.LUMEN]
@@ -100,7 +100,7 @@ app.layout = html.Div([
             ]),
 
             dbc.Row(
-                dbc.Col(dcc.Graph(figure=px.imshow(test_data.corr())))
+                dbc.Col(dcc.Graph(figure=px.imshow(test_data.corr(),color_continuous_scale=px.colors.sequential.Viridis)))
             )
         ],width=4),
 
@@ -152,7 +152,7 @@ app.layout = html.Div([
 
             dbc.Row([
                 dbc.Col([
-                    html.P('Select inputs'),
+                    html.P('Select Inputs:'),
                     dcc.Dropdown(
                         id='x_bayes',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns],
@@ -161,7 +161,7 @@ app.layout = html.Div([
                 ],width=6),
 
                 dbc.Col([
-                    html.P('Select objectives'),
+                    html.P('Select Objectives:'),
                     dcc.Dropdown(
                         id='obj_bayes',
                         multi=True
@@ -175,7 +175,7 @@ app.layout = html.Div([
 
             dbc.Row(
                 dbc.Col(
-                    dash_table.DataTable(id='datatable',style_cell={'textAlign': 'center'},),width=4
+                    dash_table.DataTable(id='datatable',),width=12
                 )
             )
         ],width=4),
@@ -206,7 +206,15 @@ def makescat(a,b,c):
               Input('hist_slide','value'),
              )
 def makehist(a,b):
-    fig = px.histogram(test_data, x=a, nbins=b)
+    fig = px.histogram(test_data, x=a, nbins=b,color_discrete_sequence=['#0f0f64'])
+    fig.update_layout(paper_bgcolor='#ffffff')
+    fig.update_layout(plot_bgcolor='#ffffff')
+    # fig.update_xaxes(showline= True)
+    # fig.update_xaxes(color= '#000000')
+    # fig.update_xaxes(linewidth= 5)
+    # fig.update_xaxes(visible=True)
+    # #fig.update_xaxes(showgrid= True)
+    # fig.update_xaxes(gridcolor= '#000000')
     return fig;
 
 @app.callback(Output('datatable', 'columns'),
@@ -318,7 +326,7 @@ def dobayes(n_clicks, x, obj):
             sequential=True,
         )
 
-    temp = [{x[i]: float(params[0][i]) for i in range(len(x))}]
+    temp = [{x[i]: round(float(params[0][i]),4) for i in range(len(x))}]
 
     return temp
 
