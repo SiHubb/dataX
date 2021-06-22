@@ -13,6 +13,21 @@ body {
     justify-content: center;
 }
 
+.footer {
+    background-color: #FFFFFF;
+    display: flex;
+
+
+
+
+
+    text-align: center;
+    margin: 10px;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
+
+}
 .textheaders {
     font-family: "Poppins", sans-serif;
     margin: 0;
@@ -21,6 +36,17 @@ body {
     font-size: 20px;
     text-align: center;
     font-weight: bold;
+}
+
+.footertext {
+font-family: "Poppins", sans-serif;
+    margin: 0;
+    background-color: #ffffff;
+    bottom: 0;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    text-color: #0f0f0f;
 }
 
 .datax {
