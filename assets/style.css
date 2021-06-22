@@ -51,7 +51,7 @@ font-family: "Poppins", sans-serif;
 
 .datax {
     background-color: #FFFFFF;
-    height = 128px;
+
     display: flex;
     flex-direction: column;
     justify-content: center;

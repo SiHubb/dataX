@@ -53,13 +53,19 @@ app.title='Data X'
 
 app.layout = html.Div([
     dbc.Row([
-        dbc.Col(),
-        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')), style={'textAlign': 'center'}),
-        dbc.Col( ),
-            ], className="datax"),
+        dbc.Col(children=html.Img(src=app.get_asset_url('DATAx.png')), style={'textAlign': 'center'},
+                width={"size": 3,  "offset": 1}),
+        dbc.Col(children=html.P('This is an example dashboard showing data from a strirred tank'
+                                ' bioreactor optimisation performed in CFD with OpenFOAM(r). The input parameters'
+                                ' are two geometric deformations to the Rushton turbine impeller (p1, p2) and the '
+                                ' rotation rate of the impeller (rps). The output metrics are the mixing effectiveness (mix)'
+                                ' and the induced cell damage (dam).'),width=7,style={'margin-top': '40px','margin-left': '20px'}),
+        dbc.Col(width=1)
+
+            ],justify="center", align="center", className="h-50"),
 
     dbc.Row([
-        dbc.Col(html.P('Parallel Co-ordinates'), className="textheaders"),
+        dbc.Col(html.P('Parallel Co-ordinates'), className="textheaders",style={'margin-top': '50px'})
     ]),
 
     dbc.Row([
@@ -115,7 +121,7 @@ dbc.Row([
                     html.P('x variable:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop',
-                        value='p1',
+                        value='dam',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
                     ),
 
@@ -124,7 +130,7 @@ dbc.Row([
                     html.P('y variable:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop2',
-                        value='p2',
+                        value='mix',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
                     ),
 
@@ -133,7 +139,7 @@ dbc.Row([
                     html.P('Colour:', style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id='scat_drop3',
-                        value='mix',
+                        value='rps',
                         options=[{'label': Parameter, 'value': Parameter} for Parameter in test_data.columns]
                     ),
 
@@ -148,9 +154,9 @@ dbc.Row([
 
     dbc.Row([
         dbc.Col(width=2),
-        dbc.Col(html.P('Select the input paramters you would like recommended values for, calculated using Bayesian'
+        dbc.Col(html.P('Select the input parameters you would like recommended values for, calculated using Bayesian'
                        ' optimisation based on maximising the selected single objective, or maximising the hypervolume'
-                       ' of the pareto front when multiple objectves are selected.'),
+                       ' of the pareto front when multiple objectives are selected.'),
             width=4),
 
         dbc.Col([
@@ -349,4 +355,4 @@ def dobayes(n_clicks, x, obj):
 
 
 if __name__ == '__main__':
-    application.run(debug=False, port=8080)
+    application.run(debug=True, port=8080)
